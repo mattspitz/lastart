@@ -1,11 +1,14 @@
 import logging
 import optparse
 import os
+import Queue
 import re
-import simplejson
+import threading
 import urllib
 import urllib2
 import xml.dom.minidom
+
+import simplejson
 
 config = simplejson.load(open("config.json", "r"))
 
@@ -29,6 +32,24 @@ class Album(object):
 
     def formulate_lastfm_query(self):
         return "%s %s" % (self.artist, self.title)
+
+class PullThread(threading.Thread):
+    def __init__(self, queue):
+        self.queue = queue
+        threading.Thread.__init__(self)
+
+    def run(self):
+        while 1:
+            try:
+                album = self.queue.get(block=False, timeout=1)
+            except Queue.Empty:
+                return
+
+            cover_url = get_cover_url(album.formulate_lastfm_query())
+            if cover_url:
+                pull_cover_url(cover_url, get_cover_fn(album.dirpath))
+            else:
+                logging.debug("Couldn't find cover url for %s" % album)
 
 def get_cover_fn(dirpath):
     return os.path.join(dirpath, options.cover_filename)
@@ -93,17 +114,21 @@ def pull_cover_url(cover_url, cover_fn):
     except:
         logging.exception("Couldn't pull cover_url %s to file %s" % (cover_url, cover_fn))
 
-def grab_cover_art(albums):
-    for album in albums:
-        cover_url = get_cover_url(album.formulate_lastfm_query())
-        if cover_url:
-            pull_cover_url(cover_url, get_cover_fn(album.dirpath))
-        else:
-            logging.debug("Couldn't find cover url for %s" % album)
-
 def main():
     albums = collect_albums(album_dir)
-    grab_cover_art(albums)
+
+    queue = Queue.Queue()
+    for album in albums:
+        queue.put(album)
+    threads = [ PullThread(queue) for i in range(config["NUM_THREADS"]) ]
+
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    if not queue.empty():
+        raise Exception, "Didn't process all elements in queue, %d remaining" % queue.qsize()
 
 if __name__ == "__main__":
     log_level = logging.DEBUG if os.environ.get("DEBUG") else logging.ERROR

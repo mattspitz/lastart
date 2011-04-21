@@ -1,4 +1,5 @@
 {
 	"API_KEY": "YOUR_LASTFM_API_KEY",
 	"ALBUM_DIR_REGEX": "(.*)(/)(?P<artist>.+) - (?P<year>\\d+)( - (?P<title>.+))?$"
+	"NUM_THREADS": 50
 }
