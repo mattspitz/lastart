@@ -71,10 +71,9 @@ def collect_albums(album_dir):
 
 def get_cover_url(album_query):
     """ Given a query, ask Last.fm for the albums that match that query.
-    Return the first album that has an extra large image for the album
-    cover.  We assume the response format will look something like this:
+    Return the largest image (extralarge or large) from the first search result.
 
-    # we assume something like this:
+    We assume the response format will look something like this:
     <results>
         <albums>
             <album>
@@ -99,14 +98,21 @@ def get_cover_url(album_query):
     try:
         domStr = urllib2.urlopen(url).read()
         dom = xml.dom.minidom.parseString(domStr)
+        images_by_size = {}
         for album in dom.getElementsByTagName("album"):
             for image in album.getElementsByTagName("image"):
-                if image.getAttribute("size") == "extralarge":
-                    try:
-                        return image.childNodes[0].data
-                    except:
-                        logging.exception("Couldn't process image node %s for query %s" % (image.toxml(), album_query))
-                        continue
+                try:
+                    size = image.getAttribute("size")
+                    if size:
+                        images_by_size[size] = image.childNodes[0].data
+                except:
+                    logging.exception("Couldn't process image node %s for query %s" % (image.toxml(), album_query))
+                    continue
+
+        # return the extralarge image (or large, if there is no extralarge)
+        for size in ["extralarge", "large"]:
+            if size in images_by_size:
+                return images_by_size[size]            
     except:
         logging.exception("Error parsing query: %s.  Skipping..." % album_query)
     return None
