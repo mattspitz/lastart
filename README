@@ -1,0 +1,12 @@
+Given a regular expression from which you can get the album's artist and
+name from the full path of a given directory, lastart will pull a cover
+image and save it as a particular filename in that directory.  Go fill in
+all of those missing covers you've got!
+
+Usage:
+./lastart.py [-f art_filename] album_dir
+
+art_filename defaults to 'cover.jpg'
+
+Hint, try:
+find /path/to/all/music -type d -exec ./lastart.py {} \;
