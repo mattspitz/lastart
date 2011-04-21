@@ -112,11 +112,11 @@ def get_cover_url(album_query):
     return None
 
 def pull_cover_url(cover_url, cover_fn):
-    logging.debug("Pulling cover_url %s to file %s" % (cover_url, cover_fn))
+    logging.debug("Pulling cover_url %s." % cover_url)
     try:
         urllib.urlretrieve(cover_url, cover_fn)
     except:
-        logging.exception("Couldn't pull cover_url %s to file %s" % (cover_url, cover_fn))
+        logging.exception("Couldn't pull cover_url %s." % cover_url)
 
 def main():
     albums = collect_albums(album_dir)
