@@ -102,7 +102,11 @@ def get_cover_url(album_query):
         for album in dom.getElementsByTagName("album"):
             for image in album.getElementsByTagName("image"):
                 if image.getAttribute("size") == "extralarge":
-                    return image.childNodes[0].data
+                    try:
+                        return image.childNodes[0].data
+                    except:
+                        logging.exception("Couldn't process image node %s for query %s" % (image.toxml(), album_query))
+                        continue
     except:
         logging.exception("Error parsing query: %s.  Skipping..." % album_query)
     return None
