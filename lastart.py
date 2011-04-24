@@ -103,7 +103,7 @@ def get_cover_url(album_query):
             for image in album.getElementsByTagName("image"):
                 try:
                     size = image.getAttribute("size")
-                    if size:
+                    if size and image.childNodes:
                         images_by_size[size] = image.childNodes[0].data
                 except:
                     logging.exception("Couldn't process image node %s for query %s" % (image.toxml(), album_query))
