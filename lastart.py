@@ -57,7 +57,7 @@ def get_cover_fn(dirpath):
 def collect_albums(album_dir):
     albums = []
     regex = re.compile(config["ALBUM_DIR_REGEX"])
-    for dirpath, dirnames, filenames in os.walk(album_dir):
+    for dirpath, _, _ in os.walk(album_dir):
         if os.path.exists(get_cover_fn(dirpath)):
             logging.debug("%s already has a '%s'.  Skipping..." % (dirpath, options.cover_filename))
             continue
@@ -105,7 +105,7 @@ def get_cover_url(album_query):
                     size = image.getAttribute("size")
                     if size and image.childNodes:
                         images_by_size[size] = image.childNodes[0].data
-                except:
+                except Exception:
                     logging.exception("Couldn't process image node %s for query %s" % (image.toxml(), album_query))
                     continue
 
@@ -113,7 +113,7 @@ def get_cover_url(album_query):
         for size in ["extralarge", "large"]:
             if size in images_by_size:
                 return images_by_size[size]            
-    except:
+    except Exception:
         logging.exception("Error parsing query: %s.  Skipping..." % album_query)
     return None
 
@@ -121,7 +121,7 @@ def pull_cover_url(cover_url, cover_fn):
     logging.debug("Pulling cover_url %s." % cover_url)
     try:
         urllib.urlretrieve(cover_url, cover_fn)
-    except:
+    except Exception:
         logging.exception("Couldn't pull cover_url %s." % cover_url)
 
 def main():
@@ -130,7 +130,7 @@ def main():
     queue = Queue.Queue()
     for album in albums:
         queue.put(album)
-    threads = [ PullThread(queue) for i in range(config["NUM_THREADS"]) ]
+    threads = [ PullThread(queue) for _ in range(config["NUM_THREADS"]) ]
 
     for thread in threads:
         thread.start()
