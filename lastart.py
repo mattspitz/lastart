@@ -1,3 +1,4 @@
+import json
 import logging
 import optparse
 import os
@@ -8,9 +9,8 @@ import urllib
 import urllib2
 import xml.dom.minidom
 
-import simplejson
 
-config = simplejson.load(open("config.json", "r"))
+config = json.load(open("config.json", "r"))
 
 parser = optparse.OptionParser()
 parser.add_option("-f", "--cover_filename", default="cover.jpg", action="store", help="the filename for the downloaded cover art; defaults to cover.jpg")
