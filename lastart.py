@@ -112,7 +112,7 @@ def get_cover_url(album_query):
         # return the extralarge image (or large, if there is no extralarge)
         for size in ["extralarge", "large"]:
             if size in images_by_size:
-                return images_by_size[size]            
+                return images_by_size[size]
     except Exception:
         logging.exception("Error parsing query: %s.  Skipping..." % album_query)
     return None
@@ -121,6 +121,7 @@ def pull_cover_url(cover_url, cover_fn):
     logging.debug("Pulling cover_url %s." % cover_url)
     try:
         urllib.urlretrieve(cover_url, cover_fn)
+        print "retrieved", cover_fn
     except Exception:
         logging.exception("Couldn't pull cover_url %s." % cover_url)
 
